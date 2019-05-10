@@ -76,11 +76,17 @@ public class PlayerMovement : MonoBehaviour
     void GroundMovement()
     {
         float xTargetVelocity = speed * input.horizontal;
-        if (playerCombat.onCombat && isOnGround)
+
+        //We cant turn the character as long as we are in combat
+        //Also we cant move while attacking on ground
+
+        if (!playerCombat.onCombat)
+        {
+            if (xTargetVelocity * direction < 0f)
+                FlipCharacterDirection();
+        }
+        else if (isOnGround)
             xTargetVelocity = 0;
-        else
-        if (xTargetVelocity * direction < 0f)
-            FlipCharacterDirection();
 
         // xTargetVelocity = Mathf.Lerp(rigidBody.velocity.x, xTargetVelocity, 0.9f);
         rigidBody.velocity = new Vector2(xTargetVelocity, rigidBody.velocity.y);
