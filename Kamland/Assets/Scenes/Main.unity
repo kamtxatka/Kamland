@@ -1045,6 +1045,7 @@ MonoBehaviour:
   maxFallSpeed: -20
   jumpForce: 16
   jumpReleaseMultiplier: 0.5
+  airCombatLevitateMultiplier: 0.9
   coyoteDuration: 0.15
   jumpPressRememberDuration: 0.15
   groundDistance: 0.2
@@ -1519,7 +1520,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 1
+  orthographic: 0
   orthographic size: 6
   m_Depth: -1
   m_CullingMask:

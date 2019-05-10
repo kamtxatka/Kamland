@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Jump Properties")]
     [SerializeField] int jumpForce = 16;
     [SerializeField] float jumpReleaseMultiplier = 0.5f;
+    [SerializeField] float airCombatLevitateMultiplier = 0.95f;
     [SerializeField] float coyoteDuration = 0.05f;
     [SerializeField] float jumpPressRememberDuration = 0.15f;
 
@@ -87,6 +88,10 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (isOnGround)
             xTargetVelocity = 0;
+        else
+        {
+            xTargetVelocity = 0;
+        }
 
         // xTargetVelocity = Mathf.Lerp(rigidBody.velocity.x, xTargetVelocity, 0.9f);
         rigidBody.velocity = new Vector2(xTargetVelocity, rigidBody.velocity.y);
@@ -94,8 +99,6 @@ public class PlayerMovement : MonoBehaviour
 
     void MidAirMovement()
     {
-        // if (playerCombat.onCombat)
-        //     return;
 
         if (input.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
@@ -111,14 +114,15 @@ public class PlayerMovement : MonoBehaviour
             rigidBody.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
         }
 
-        if (!isOnGround)
+        //If you attack while falling, fall slower
+        if (playerCombat.onCombat && rigidBody.velocity.y < 0)
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, rigidBody.velocity.y * 0f);
+
+        //Cut Y velocity if player isn't holding jump button anymore
+        if (!isOnGround && !input.jumpHeld)
         {
-            //Cut Y velocity if player isn't holding jump button anymore
-            if (!input.jumpHeld)
-            {
-                if (rigidBody.velocity.y > 0)
-                    rigidBody.velocity = new Vector3(rigidBody.velocity.x, rigidBody.velocity.y * jumpReleaseMultiplier);
-            }
+            if (rigidBody.velocity.y > 0)
+                rigidBody.velocity = new Vector3(rigidBody.velocity.x, rigidBody.velocity.y * jumpReleaseMultiplier);
         }
 
         //Player can't fall faster than maxFallSpeed
