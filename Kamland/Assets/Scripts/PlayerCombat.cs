@@ -8,7 +8,7 @@ public class PlayerCombat : MonoBehaviour
     [HideInInspector] public int comboStep = 1;
     [HideInInspector] public bool attack;
 
-    [SerializeField] float comboLength = 3;
+    [SerializeField] float comboLength = 2;
     [SerializeField] float timeBetweenAttacks = 0.5f;              //Time (seconds) between each attack
 
     PlayerInput input;
@@ -16,8 +16,8 @@ public class PlayerCombat : MonoBehaviour
     Animator animator;
     PlayerCombatMachine playerCombatMachine;
 
-    bool comboAdded;                                                //Will we go to the next combo state?
-    float attackTime;
+    float nextAttakTime;
+    float comboEndTime;
 
     void Awake()
     {
@@ -26,7 +26,7 @@ public class PlayerCombat : MonoBehaviour
         animator = GetComponent<Animator>();
 
         onCombo = false;
-        comboAdded = false;
+        comboStep = 1;
     }
 
     void Start()
@@ -37,35 +37,37 @@ public class PlayerCombat : MonoBehaviour
 
     public void UpdateCombos()
     {
-        attack = input.attack;
+        //3 conditions to attack
+        //Input
+        //On ground
+        //It has been enough time since last attack
+        attack = (input.attack && playerMovement.isOnGround && Time.time > nextAttakTime);
 
-        if (!playerMovement.isOnGround)
-            attack = false;
-
-        if (attack && onCombo && !comboAdded)
-        {
-            comboStep++;
-            if (comboStep > comboLength)
-                comboStep = 1;
-
-            // comboStep = comboStep == 1 ? 2 : 1;
-            comboAdded = true;
-        }
+        //Reset combo if time for combo has ended
+        if (Time.time > comboEndTime)
+            comboStep = 1;
     }
 
     public void OnStateMachineEnter()
     {
         onCombo = true;
+        comboEndTime = nextAttakTime + timeBetweenAttacks;
     }
 
     public void OnStateEnter()
     {
-        comboAdded = false;
+        //Iterate combo
+        comboStep++;
+        if (comboStep > comboLength)
+            comboStep = 1;
+
+        //Reset timers for next attack and combo end
+        nextAttakTime = Time.time + timeBetweenAttacks;
+        comboEndTime = nextAttakTime + timeBetweenAttacks;
     }
 
     public void OnStateMachineExit()
     {
         onCombo = false;
-        comboStep = 1;
     }
 }
