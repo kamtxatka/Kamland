@@ -14,7 +14,6 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] float attackRememberDuration = 0.1f;
 
     PlayerInput input;
-    PlayerMovement playerMovement;
     Animator animator;
     PlayerCombatMachine playerCombatMachine;
 
@@ -25,7 +24,6 @@ public class PlayerCombat : MonoBehaviour
     void Awake()
     {
         input = GetComponent<PlayerInput>();
-        playerMovement = GetComponent<PlayerMovement>();
         animator = GetComponent<Animator>();
 
         onCombat = false;
@@ -47,10 +45,6 @@ public class PlayerCombat : MonoBehaviour
             attackRememberTime = Time.time + attackRememberDuration;
 
         attack = (attackRememberTime > Time.time && Time.time > nextAttakTime);
-
-        //Only attack On ground
-        // if (!playerMovement.isOnGround)
-        //     attack = false;
 
         //Reset combo if time for combo has ended
         if (Time.time > comboEndTime)
