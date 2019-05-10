@@ -76,7 +76,7 @@ public class PlayerMovement : MonoBehaviour
     void GroundMovement()
     {
         float xTargetVelocity = speed * input.horizontal;
-        if (playerCombat.onCombo)
+        if (playerCombat.onCombat && isOnGround)
             xTargetVelocity = 0;
         else
         if (xTargetVelocity * direction < 0f)
@@ -88,8 +88,8 @@ public class PlayerMovement : MonoBehaviour
 
     void MidAirMovement()
     {
-        if (playerCombat.onCombo)
-            return;
+        // if (playerCombat.onCombat)
+        //     return;
 
         if (input.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;

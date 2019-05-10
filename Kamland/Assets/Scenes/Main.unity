@@ -1021,11 +1021,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 342d0d893e7524e46bcba465d7e61d15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onCombo: 0
+  onCombat: 0
   comboStep: 1
   attack: 0
-  comboLength: 3
+  comboLength: 2
   timeBetweenAttacks: 0.5
+  bonusTimeToEndComboRelation: 0.5
+  attackRememberDuration: 0.1
 --- !u!114 &1004724199
 MonoBehaviour:
   m_ObjectHideFlags: 0
