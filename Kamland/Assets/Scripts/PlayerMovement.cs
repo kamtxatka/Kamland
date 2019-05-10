@@ -13,7 +13,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Jump Properties")]
     [SerializeField] int jumpForce = 16;
     [SerializeField] float jumpReleaseMultiplier = 0.5f;
-    [SerializeField] float airCombatLevitateMultiplier = 0.95f;
     [SerializeField] float coyoteDuration = 0.05f;
     [SerializeField] float jumpPressRememberDuration = 0.15f;
 
@@ -78,19 +77,13 @@ public class PlayerMovement : MonoBehaviour
     {
         float xTargetVelocity = speed * input.horizontal;
 
-        //We cant turn the character as long as we are in combat
-        //Also we cant move while attacking on ground
-
-        if (!playerCombat.onCombat)
-        {
-            if (xTargetVelocity * direction < 0f)
-                FlipCharacterDirection();
-        }
-        else if (isOnGround)
+        //On combat we cant turn nor move horizontally
+        if (playerCombat.onCombat)
             xTargetVelocity = 0;
         else
         {
-            xTargetVelocity = 0;
+            if (xTargetVelocity * direction < 0f)
+                FlipCharacterDirection();
         }
 
         // xTargetVelocity = Mathf.Lerp(rigidBody.velocity.x, xTargetVelocity, 0.9f);
