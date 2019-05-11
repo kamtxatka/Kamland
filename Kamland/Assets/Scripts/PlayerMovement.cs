@@ -77,8 +77,8 @@ public class PlayerMovement : MonoBehaviour
     {
         float xTargetVelocity = speed * input.horizontal;
 
-        //On combat we cant turn nor move horizontally
-        if (playerCombat.onCombat)
+        //We can move why attacking on ground or flip while in combat
+        if (playerCombat.onCombat && isOnGround)
             xTargetVelocity = 0;
         else
         {
@@ -86,13 +86,11 @@ public class PlayerMovement : MonoBehaviour
                 FlipCharacterDirection();
         }
 
-        // xTargetVelocity = Mathf.Lerp(rigidBody.velocity.x, xTargetVelocity, 0.9f);
         rigidBody.velocity = new Vector2(xTargetVelocity, rigidBody.velocity.y);
     }
 
     void MidAirMovement()
     {
-
         if (input.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
         if (isOnGround)
@@ -106,10 +104,6 @@ public class PlayerMovement : MonoBehaviour
             rigidBody.velocity = new Vector2(rigidBody.velocity.x, 0f);
             rigidBody.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
         }
-
-        //If you attack while falling, fall slower
-        if (playerCombat.onCombat && rigidBody.velocity.y < 0)
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, rigidBody.velocity.y * 0f);
 
         //Cut Y velocity if player isn't holding jump button anymore
         if (!isOnGround && !input.jumpHeld)

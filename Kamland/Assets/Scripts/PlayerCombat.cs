@@ -9,8 +9,8 @@ public class PlayerCombat : MonoBehaviour
     [HideInInspector] public bool attack;
 
     [SerializeField] float comboLength = 2;
-    [SerializeField] float timeBetweenAttacks = 0.3f;              //Time (seconds) between each attack
-    [SerializeField] float bonusTimeToEndComboRelation = 1f;
+    [SerializeField] float timeBetweenAttacks = 0.5f;
+    [SerializeField] float bonusTimeToEndComboRelation = 0.5f;
     [SerializeField] float attackRememberDuration = 0.1f;
 
     PlayerInput input;
