@@ -45,7 +45,7 @@ public class PlayerAnimation : MonoBehaviour
 
         //Combat
         playerCombat.UpdateCombos();
-        anim.SetBool(attackParamID, playerCombat.attack);
+        anim.SetBool(attackParamID, playerCombat.wantToAttack);
         anim.SetInteger(comboStepParamID, playerCombat.comboStep);
     }
 

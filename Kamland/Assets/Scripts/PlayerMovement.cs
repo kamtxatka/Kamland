@@ -77,14 +77,16 @@ public class PlayerMovement : MonoBehaviour
     {
         float xTargetVelocity = speed * input.horizontal;
 
-        //We can move why attacking on ground or flip while in combat
-        if (playerCombat.onCombat && isOnGround)
-            xTargetVelocity = 0;
-        else
-        {
+        //Conditions to limit horizontal speed:
+        //Attacking on ground
+        if (playerCombat.onCombatAnimation && isOnGround)
+            xTargetVelocity = 0f;
+
+        //Conditions to be able to turn the character:
+        //Not currently attacking
+        if (!playerCombat.onCombatAnimation)
             if (xTargetVelocity * direction < 0f)
                 FlipCharacterDirection();
-        }
 
         rigidBody.velocity = new Vector2(xTargetVelocity, rigidBody.velocity.y);
     }

@@ -4,29 +4,29 @@ using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
-    [HideInInspector] public bool onCombat;
-    [HideInInspector] public int comboStep = 1;
-    [HideInInspector] public bool attack;
+    [HideInInspector] public bool onCombatAnimation;                    //Are we in any attack animation?
+    [HideInInspector] public int comboStep = 1;                         //What attack would we going to use next
+    [HideInInspector] public bool wantToAttack;                         //Input attack (+ holds a bit for easy control)
 
-    [SerializeField] float comboLength = 2;
-    [SerializeField] float timeBetweenAttacks = 0.5f;
-    [SerializeField] float bonusTimeToEndComboRelation = 0.5f;
-    [SerializeField] float attackRememberDuration = 0.1f;
+    [SerializeField] float comboLength = 2;                             //Self explanatory
+    [SerializeField] float timeBetweenAttacks = 0.5f;                   //Self explanatory
+    [SerializeField] float bonusTimeToEndComboRelation = 0.5f;          //Time to reset combo after an attack (relative to time between attacks)
+    [SerializeField] float attackRememberDuration = 0.1f;               //Time to hold attack=true after input (for easy control)
 
     PlayerInput input;
     Animator animator;
     PlayerCombatMachine playerCombatMachine;
 
-    float nextAttakTime;
-    float comboEndTime;
-    float attackRememberTime;
+    float nextAttakTime;                                                //When will the player be able to attack again?
+    float comboEndTime;                                                 //When will combo reset?
+    float attackRememberTime;                                           //We want to attack up until this very moment
 
     void Awake()
     {
         input = GetComponent<PlayerInput>();
         animator = GetComponent<Animator>();
 
-        onCombat = false;
+        onCombatAnimation = false;
         comboStep = 1;
     }
 
@@ -44,7 +44,7 @@ public class PlayerCombat : MonoBehaviour
         if (input.attack)
             attackRememberTime = Time.time + attackRememberDuration;
 
-        attack = (attackRememberTime > Time.time && Time.time > nextAttakTime);
+        wantToAttack = (attackRememberTime > Time.time && Time.time > nextAttakTime);
 
         //Reset combo if time for combo has ended
         if (Time.time > comboEndTime)
@@ -53,7 +53,7 @@ public class PlayerCombat : MonoBehaviour
 
     public void OnStateMachineEnter()
     {
-        onCombat = true;
+        onCombatAnimation = true;
         comboEndTime = nextAttakTime + timeBetweenAttacks;
     }
 
@@ -71,6 +71,6 @@ public class PlayerCombat : MonoBehaviour
 
     public void OnStateMachineExit()
     {
-        onCombat = false;
+        onCombatAnimation = false;
     }
 }
