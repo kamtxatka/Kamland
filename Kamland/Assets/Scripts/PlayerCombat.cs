@@ -8,7 +8,7 @@ public class PlayerCombat : MonoBehaviour
     [HideInInspector] public int comboStep = 1;                         //What attack would we going to use next
     [HideInInspector] public bool wantToAttack;                         //Input attack (+ holds a bit for easy control)
 
-    [SerializeField] float comboLength = 2;                             //Self explanatory
+    [SerializeField] float comboLength = 2f;                            //Self explanatory
     [SerializeField] float timeBetweenAttacks = 0.5f;                   //Self explanatory
     [SerializeField] float bonusTimeToEndComboRelation = 0.5f;          //Time to reset combo after an attack (relative to time between attacks)
     [SerializeField] float attackRememberDuration = 0.1f;               //Time to hold attack=true after input (for easy control)

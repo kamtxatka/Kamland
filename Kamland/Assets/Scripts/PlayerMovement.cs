@@ -13,7 +13,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Jump Properties")]
     [SerializeField] int jumpForce = 16;                        //Jump force
     [SerializeField] float jumpReleaseMultiplier = 0.5f;        //Ratio at which the vertical speed is cutted when releasing jump input
-    [SerializeField] float coyoteDuration = 0.05f;                  //Duration we consider player is STILL on ground
+    [SerializeField] float coyoteDuration = 0.15f;                  //Duration we consider player is STILL on ground
     [SerializeField] float jumpPressRememberDuration = 0.15f;   //Duration we consider player is STILL pressing jump input
 
     [Header("Environment Check Properties")]
@@ -68,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
     {
         isOnGround = false;
 
-        if (rigidBody.velocity.y > 0)
+        if (rigidBody.velocity.y > 0f)
             return;
 
         RaycastHit2D leftHit = RaycastWithOffset(new Vector2(footOffsetXLeft, footOffsetY), Vector2.down, groundDistance, groundLayer);
@@ -112,8 +112,8 @@ public class PlayerMovement : MonoBehaviour
         //Jump
         if (jumpPressRememberTime > Time.time && coyoteTime > Time.time)
         {
-            jumpPressRememberTime = 0;
-            coyoteTime = 0;
+            jumpPressRememberTime = 0f;
+            coyoteTime = 0f;
             isOnGround = false;
             rigidBody.velocity = new Vector2(rigidBody.velocity.x, 0f);
             rigidBody.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
@@ -122,7 +122,7 @@ public class PlayerMovement : MonoBehaviour
         //Cut Y velocity if player isn't holding jump button anymore
         if (!isOnGround && !input.jumpHeld)
         {
-            if (rigidBody.velocity.y > 0)
+            if (rigidBody.velocity.y > 0f)
                 rigidBody.velocity = new Vector3(rigidBody.velocity.x, rigidBody.velocity.y * jumpReleaseMultiplier);
         }
 
@@ -134,8 +134,8 @@ public class PlayerMovement : MonoBehaviour
     void FlipCharacterDirection()
     {
         direction *= -1;
-        footOffsetXLeft *= -1;
-        footOffsetXRight *= -1;
+        footOffsetXLeft *= -1f;
+        footOffsetXRight *= -1f;
 
         Vector3 scale = transform.localScale;
         scale.x = originalXScale * direction;
