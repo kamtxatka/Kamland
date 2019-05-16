@@ -4,39 +4,39 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] bool drawDebugRaycasts = false;
+    [SerializeField] bool drawDebugRaycasts = false;            //Draw visible raycasts for debugging
 
     [Header("Movement Properties")]
-    [SerializeField] int speed = 8;
-    [SerializeField] float maxFallSpeed = -20f;
+    [SerializeField] int speed = 8;                             //Horizontal speed
+    [SerializeField] float maxFallSpeed = -20f;                 //Max speed char can fall at
 
     [Header("Jump Properties")]
-    [SerializeField] int jumpForce = 16;
-    [SerializeField] float jumpReleaseMultiplier = 0.5f;
-    [SerializeField] float coyoteDuration = 0.05f;
-    [SerializeField] float jumpPressRememberDuration = 0.15f;
+    [SerializeField] int jumpForce = 16;                        //Jump force
+    [SerializeField] float jumpReleaseMultiplier = 0.5f;        //Ratio at which the vertical speed is cutted when releasing jump input
+    [SerializeField] float coyoteDuration = 0.05f;                  //Duration we consider player is STILL on ground
+    [SerializeField] float jumpPressRememberDuration = 0.15f;   //Duration we consider player is STILL pressing jump input
 
     [Header("Environment Check Properties")]
-    [SerializeField] float groundDistance = 0.2f;
-    [SerializeField] LayerMask groundLayer;
+    [SerializeField] float groundDistance = 0.2f;               //Distance to validate we are on ground (raycasts)
+    [SerializeField] LayerMask groundLayer;                     //What layer can teh player walk on?
 
     [Header("Status Flags")]
-    public bool isOnGround;
+    public bool isOnGround;                                     //Is player on ground
 
     PlayerInput input;
     PlayerCombat playerCombat;
     BoxCollider2D boxCollider;
     Rigidbody2D rigidBody;
 
-    float coyoteTime;
-    float jumpPressRememberTime;
+    float coyoteTime;                                           //We consider player is on ground untill this time
+    float jumpPressRememberTime;                                //We consider players is input jumping untill this time
 
-    float originalXScale;
-    int direction = 1;
+    float originalXScale;                                       //For turning char
+    int direction = 1;                                          //Current char dir. Right 1, Left -1
 
-    float footOffsetXLeft;                                  //Left foot FROM players perspective
-    float footOffsetXRight;                                 //Left foot FROM players perspective
-    float footOffsetY;                                      //Diference between pos.y and colliderMinY
+    float footOffsetXLeft;                                      //Left foot FROM players perspective
+    float footOffsetXRight;                                     //Left foot FROM players perspective
+    float footOffsetY;                                          //Diference between pos.y and colliderMinY
 
     void Awake()
     {
@@ -47,19 +47,23 @@ public class PlayerMovement : MonoBehaviour
 
         originalXScale = transform.localScale.x;
 
-        footOffsetXLeft = boxCollider.offset.x + boxCollider.size.x * 0.5f;
-        footOffsetXRight = boxCollider.offset.x - boxCollider.size.x * 0.5f;
+        //Left char foot is to the right of screen (player facing right)
+        //Right char foot is to the left of the screen (player facing right)
+        footOffsetXLeft = direction * boxCollider.offset.x + boxCollider.size.x * 0.5f;
+        footOffsetXRight = direction * boxCollider.offset.x - boxCollider.size.x * 0.5f;
         footOffsetY = boxCollider.offset.y - boxCollider.size.y * 0.5f;
     }
 
     void FixedUpdate()
     {
         PhysicsCheck();
-        GroundMovement();
+        HorizontalMovement();
         MidAirMovement();
     }
 
-
+    /// <summary>
+    /// Check if player is on ground + other physic checks in the future
+    /// </summary>
     void PhysicsCheck()
     {
         isOnGround = false;
@@ -73,7 +77,10 @@ public class PlayerMovement : MonoBehaviour
             isOnGround = true;
     }
 
-    void GroundMovement()
+    /// <summary>
+    /// Horizontal Movement related behaviour
+    /// </summary>
+    void HorizontalMovement()
     {
         float xTargetVelocity = speed * input.horizontal;
 
@@ -91,13 +98,18 @@ public class PlayerMovement : MonoBehaviour
         rigidBody.velocity = new Vector2(xTargetVelocity, rigidBody.velocity.y);
     }
 
+    /// <summary>
+    /// Vertical Movement related behaviour
+    /// </summary>
     void MidAirMovement()
     {
+        //Conditions to make jump easier
         if (input.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
         if (isOnGround)
             coyoteTime = Time.time + coyoteDuration;
 
+        //Jump
         if (jumpPressRememberTime > Time.time && coyoteTime > Time.time)
         {
             jumpPressRememberTime = 0;
