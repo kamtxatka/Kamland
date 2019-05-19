@@ -7,13 +7,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] bool drawDebugRaycasts = false;            //Draw visible raycasts for debugging
 
     [Header("Movement Properties")]
-    [SerializeField] int speed = 8;                             //Horizontal speed
-    [SerializeField] float maxFallSpeed = -20f;                 //Max speed char can fall at
+    [SerializeField] float horizontalSpeed = 8.3f;              //Horizontal speed
+    [SerializeField] float maxFallSpeed = -20.9f;               //Max speed char can fall at
 
     [Header("Jump Properties")]
-    [SerializeField] int jumpForce = 16;                        //Jump force
+    [SerializeField] float jumpSpeed = 15.7f;                   //Jump force
     [SerializeField] float jumpReleaseMultiplier = 0.5f;        //Ratio at which the vertical speed is cutted when releasing jump input
-    [SerializeField] float coyoteDuration = 0.15f;                  //Duration we consider player is STILL on ground
+    [SerializeField] float coyoteDuration = 0.15f;              //Duration we consider player is STILL on ground
     [SerializeField] float jumpPressRememberDuration = 0.15f;   //Duration we consider player is STILL pressing jump input
 
     [Header("Environment Check Properties")]
@@ -82,7 +82,7 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     void HorizontalMovement()
     {
-        float xTargetVelocity = speed * input.horizontal;
+        float xTargetVelocity = horizontalSpeed * input.horizontal;
 
         //Conditions to limit horizontal speed:
         //Attacking on ground
@@ -115,8 +115,7 @@ public class PlayerMovement : MonoBehaviour
             jumpPressRememberTime = 0f;
             coyoteTime = 0f;
             isOnGround = false;
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, 0f);
-            rigidBody.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpSpeed);
         }
 
         //Cut Y velocity if player isn't holding jump button anymore

@@ -1678,9 +1678,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 342d0d893e7524e46bcba465d7e61d15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onCombat: 0
+  onCombatAnimation: 0
   comboStep: 1
-  attack: 0
+  wantToAttack: 0
   comboLength: 2
   timeBetweenAttacks: 0.5
   bonusTimeToEndComboRelation: 0.5
@@ -1698,9 +1698,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drawDebugRaycasts: 1
-  speed: 8
-  maxFallSpeed: -20
-  jumpForce: 16
+  horizontalSpeed: 8.3
+  maxFallSpeed: -20.9
+  jumpSpeed: 15.7
   jumpReleaseMultiplier: 0.5
   coyoteDuration: 0.15
   jumpPressRememberDuration: 0.15
