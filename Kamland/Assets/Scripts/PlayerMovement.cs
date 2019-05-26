@@ -103,14 +103,26 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     void MidAirMovement()
     {
-        //Conditions to make jump easier
+        bool willJump = false;
+
+        //Conditions to jump (with timers to make easier controls)
+        //1 Input
+        //2 OnGround
         if (input.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
         if (isOnGround)
             coyoteTime = Time.time + coyoteDuration;
+        
+        willJump = jumpPressRememberTime > Time.time && coyoteTime > Time.time;
+
+        //Conditions to cancel jump
+        //Attacking + on ground
+        //Dont need to check on ground. We can't jump while on air either.
+        if(playerCombat.onCombatAnimation)
+            willJump = false;
 
         //Jump
-        if (jumpPressRememberTime > Time.time && coyoteTime > Time.time)
+        if (willJump)
         {
             jumpPressRememberTime = 0f;
             coyoteTime = 0f;

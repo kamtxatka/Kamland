@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
-    [HideInInspector] public bool onCombatAnimation;                    //Are we in any attack animation?
-    [HideInInspector] public int comboStep = 1;                         //What attack would we going to use next
     [HideInInspector] public bool wantToAttack;                         //Input attack (+ holds a bit for easy control)
+    [HideInInspector] public int comboStep = 1;                         //What attack would we going to use next
+    [HideInInspector] public bool onCombatAnimation;                    //Are we in any attack animation?
+    [HideInInspector] public bool onGroundCombat;                       //Player attacked... on ground?
+    [HideInInspector] public bool onAirCombat;                          //Player attacked... on air?
 
     [SerializeField] float comboLength = 2f;                            //Self explanatory
     [SerializeField] float timeBetweenAttacks = 0.5f;                   //Self explanatory
@@ -27,6 +29,8 @@ public class PlayerCombat : MonoBehaviour
         animator = GetComponent<Animator>();
 
         onCombatAnimation = false;
+        onGroundCombat = false;
+        onAirCombat = false;
         comboStep = 1;
     }
 
