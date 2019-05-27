@@ -85,7 +85,8 @@ public class PlayerMovement : MonoBehaviour
         float xTargetVelocity = horizontalSpeed * playerInput.horizontal;
 
         //Conditions to limit horizontal speed:
-        //Attacking on ground
+        //Performing a grounded attack
+        //Say we started attacking on air. We could still move horizontallly when we touch the ground
         if (playerCombat.onGroundCombat && isOnGround)
             xTargetVelocity = 0f;
 
@@ -112,13 +113,13 @@ public class PlayerMovement : MonoBehaviour
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
         if (isOnGround)
             coyoteTime = Time.time + coyoteDuration;
-        
+
         willJump = jumpPressRememberTime > Time.time && coyoteTime > Time.time;
 
         //Conditions to cancel jump
         //Attacking + on ground
         //Dont need to check on ground. We can't jump while on air either.
-        if(playerCombat.onCombatAnimation)
+        if (playerCombat.onCombatAnimation)
             willJump = false;
 
         //Jump

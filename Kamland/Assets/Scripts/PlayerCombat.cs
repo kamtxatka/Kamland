@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
-    [HideInInspector] public bool wantToAttack;                         //Input attack (+ holds a bit for easy control)
+    [HideInInspector] public bool isGonnaAttack;                        //Will player attack this update cycle (for sure)?
     [HideInInspector] public int comboStep = 1;                         //What attack would we going to use next
     [HideInInspector] public bool onCombatAnimation;                    //Are we in any attack animation?
-    [HideInInspector] public bool onGroundCombat;                       //Player attacking... on ground?
-    [HideInInspector] public bool onAirCombat;                          //Player attacking... on air?
+    [HideInInspector] public bool onGroundCombat;                       //Combat on ground?
+    [HideInInspector] public bool onAirCombat;                          //Combat on air?
 
-    [SerializeField] float comboLength = 2f;                            //Self explanatory
+    [SerializeField] int comboLength = 2;                               //Self explanatory
     [SerializeField] float timeBetweenAttacks = 0.5f;                   //Self explanatory
     [SerializeField] float bonusTimeToEndComboRelation = 0.5f;          //Time to reset combo after an attack (relative to time between attacks)
     [SerializeField] float attackRememberDuration = 0.1f;               //Time to hold attack=true after input (for easy control)
@@ -43,20 +43,22 @@ public class PlayerCombat : MonoBehaviour
     }
 
     /// <summary>
-    /// UpdateCombos is called from playerAnimation component right before updating animator.
+    /// Updates all animation related fields. Called from playerAnimation component right before updating animator.
     /// </summary>
-    public void UpdateCombos()
+    public void UpdateCombat()
     {
-        //2 conditions to attack
-        //Input
-        //It has been enough time since last attack
+        //Save attack input. Allways
         if (playerInput.attack)
             attackRememberTime = Time.time + attackRememberDuration;
 
-        wantToAttack = (attackRememberTime > Time.time && Time.time > nextAttakTime);
+        //3 conditions to attack
+        //Not actually attacking
+        //Input
+        //Enough time has passed since last attack
+        isGonnaAttack = (!onCombatAnimation && attackRememberTime > Time.time && Time.time > nextAttakTime);
 
         //We are sure player will attack. on ground - on air??
-        if (wantToAttack)
+        if (isGonnaAttack)
         {
             if (playerMovement.isOnGround)
                 onGroundCombat = true;

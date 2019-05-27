@@ -16,7 +16,7 @@ public class PlayerAnimation : MonoBehaviour
     readonly int groundParamID = Animator.StringToHash("isOnGround");
     readonly int airParamID = Animator.StringToHash("verticalVelocity");
 
-    readonly int attackParamID = Animator.StringToHash("isAttack");
+    readonly int attackParamID = Animator.StringToHash("isGonnaAttack");
     readonly int comboStepParamID = Animator.StringToHash("comboStep");
 
     readonly int hitParamID = Animator.StringToHash("hit");
@@ -44,8 +44,8 @@ public class PlayerAnimation : MonoBehaviour
         anim.SetFloat(airParamID, rigidBody.velocity.y);
 
         //Combat
-        playerCombat.UpdateCombos();
-        anim.SetBool(attackParamID, playerCombat.wantToAttack);
+        playerCombat.UpdateCombat();
+        anim.SetBool(attackParamID, playerCombat.isGonnaAttack);
         anim.SetInteger(comboStepParamID, playerCombat.comboStep);
     }
 
