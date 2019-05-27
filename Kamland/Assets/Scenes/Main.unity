@@ -1678,9 +1678,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 342d0d893e7524e46bcba465d7e61d15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onCombatAnimation: 0
-  comboStep: 1
   wantToAttack: 0
+  comboStep: 1
+  onCombatAnimation: 0
+  onGroundCombat: 0
+  onAirCombat: 0
   comboLength: 2
   timeBetweenAttacks: 0.5
   bonusTimeToEndComboRelation: 0.5

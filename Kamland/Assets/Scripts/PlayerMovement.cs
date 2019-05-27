@@ -23,10 +23,10 @@ public class PlayerMovement : MonoBehaviour
     [Header("Status Flags")]
     public bool isOnGround;                                     //Is player on ground
 
-    PlayerInput input;
-    PlayerCombat playerCombat;
     BoxCollider2D boxCollider;
     Rigidbody2D rigidBody;
+    PlayerInput playerInput;
+    PlayerCombat playerCombat;
 
     float coyoteTime;                                           //We consider player is on ground untill this time
     float jumpPressRememberTime;                                //We consider players is input jumping untill this time
@@ -40,10 +40,10 @@ public class PlayerMovement : MonoBehaviour
 
     void Awake()
     {
-        input = GetComponent<PlayerInput>();
-        playerCombat = GetComponent<PlayerCombat>();
         boxCollider = GetComponent<BoxCollider2D>();
         rigidBody = GetComponent<Rigidbody2D>();
+        playerInput = GetComponent<PlayerInput>();
+        playerCombat = GetComponent<PlayerCombat>();
 
         originalXScale = transform.localScale.x;
 
@@ -82,11 +82,11 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     void HorizontalMovement()
     {
-        float xTargetVelocity = horizontalSpeed * input.horizontal;
+        float xTargetVelocity = horizontalSpeed * playerInput.horizontal;
 
         //Conditions to limit horizontal speed:
         //Attacking on ground
-        if (playerCombat.onCombatAnimation && isOnGround)
+        if (playerCombat.onGroundCombat && isOnGround)
             xTargetVelocity = 0f;
 
         //Conditions to be able to turn the character:
@@ -108,7 +108,7 @@ public class PlayerMovement : MonoBehaviour
         //Conditions to jump (with timers to make easier controls)
         //1 Input
         //2 OnGround
-        if (input.jumpPressed)
+        if (playerInput.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
         if (isOnGround)
             coyoteTime = Time.time + coyoteDuration;
@@ -131,7 +131,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Cut Y velocity if player isn't holding jump button anymore
-        if (!isOnGround && !input.jumpHeld)
+        if (!isOnGround && !playerInput.jumpHeld)
         {
             if (rigidBody.velocity.y > 0f)
                 rigidBody.velocity = new Vector3(rigidBody.velocity.x, rigidBody.velocity.y * jumpReleaseMultiplier);
