@@ -1678,13 +1678,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 342d0d893e7524e46bcba465d7e61d15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wantToAttack: 0
+  isGonnaAttack: 0
   comboStep: 1
-  onCombatAnimation: 0
+  attacking: 0
   onGroundCombat: 0
   onAirCombat: 0
   comboLength: 2
-  timeBetweenAttacks: 0.5
+  timeBetweenAttacks: 0.4
   bonusTimeToEndComboRelation: 0.5
   attackRememberDuration: 0.1
 --- !u!114 &1004724199
@@ -1703,6 +1703,7 @@ MonoBehaviour:
   horizontalSpeed: 8.3
   maxFallSpeed: -20.9
   jumpSpeed: 15.7
+  jumpingImpulseDuration: 0.1
   jumpReleaseMultiplier: 0.5
   coyoteDuration: 0.15
   jumpPressRememberDuration: 0.15
@@ -1710,7 +1711,9 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 256
-  isOnGround: 0
+  grounded: 0
+  jumping: 0
+  falling: 0
 --- !u!114 &1004724200
 MonoBehaviour:
   m_ObjectHideFlags: 0

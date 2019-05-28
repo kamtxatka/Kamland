@@ -12,6 +12,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Jump Properties")]
     [SerializeField] float jumpSpeed = 15.7f;                   //Jump force
+    [SerializeField] float jumpingImpulseDuration = 0.1f;       //Duration we set yspeed to jumpspeed when jumping
     [SerializeField] float jumpReleaseMultiplier = 0.5f;        //Ratio at which the vertical speed is cutted when releasing jump input
     [SerializeField] float coyoteDuration = 0.15f;              //Duration we consider player is STILL on ground
     [SerializeField] float jumpPressRememberDuration = 0.15f;   //Duration we consider player is STILL pressing jump input
@@ -21,13 +22,16 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] LayerMask groundLayer;                     //What layer can teh player walk on?
 
     [Header("Status Flags")]
-    public bool isOnGround;                                     //Is player on ground
+    public bool grounded;                                       //Is player on ground 
+    public bool jumping;                                        //Debug utility: True while we set yspeed to jumpforce (0.1s aprox)
+    public bool falling;                                        //Debug utility: Is player falling?
 
     BoxCollider2D boxCollider;
     Rigidbody2D rigidBody;
     PlayerInput playerInput;
     PlayerCombat playerCombat;
 
+    float jumpingImpulseTime;                                   //After this time we wont set yspeed to jumpspeed anymore
     float coyoteTime;                                           //We consider player is on ground untill this time
     float jumpPressRememberTime;                                //We consider players is input jumping untill this time
 
@@ -62,11 +66,12 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Check if player is on ground + other physic checks in the future
+    /// Check grounded, falling and jumping state
     /// </summary>
     void PhysicsCheck()
     {
-        isOnGround = false;
+        grounded = false;
+        falling = (rigidBody.velocity.y < 0f) ? true : false;
 
         if (rigidBody.velocity.y > 0f)
             return;
@@ -74,7 +79,10 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit2D leftHit = RaycastWithOffset(new Vector2(footOffsetXLeft, footOffsetY), Vector2.down, groundDistance, groundLayer);
         RaycastHit2D rightHit = RaycastWithOffset(new Vector2(footOffsetXRight, footOffsetY), Vector2.down, groundDistance, groundLayer);
         if (leftHit || rightHit)
-            isOnGround = true;
+            grounded = true;
+
+        if (grounded)
+            jumping = false;
     }
 
     /// <summary>
@@ -84,15 +92,15 @@ public class PlayerMovement : MonoBehaviour
     {
         float xTargetVelocity = horizontalSpeed * playerInput.horizontal;
 
-        //Conditions to limit horizontal speed:
+        //Conditions to avoid horizontal movement:
         //Performing a grounded attack
         //Say we started attacking on air. We could still move horizontallly when we touch the ground
-        if (playerCombat.onGroundCombat && isOnGround)
+        if (playerCombat.onGroundCombat)
             xTargetVelocity = 0f;
 
         //Conditions to be able to turn the character:
         //Not currently attacking
-        if (!playerCombat.onCombatAnimation)
+        if (!playerCombat.attacking)
             if (xTargetVelocity * direction < 0f)
                 FlipCharacterDirection();
 
@@ -111,28 +119,33 @@ public class PlayerMovement : MonoBehaviour
         //2 OnGround
         if (playerInput.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
-        if (isOnGround)
+        if (grounded)
             coyoteTime = Time.time + coyoteDuration;
 
         willJump = jumpPressRememberTime > Time.time && coyoteTime > Time.time;
 
         //Conditions to cancel jump
-        //Attacking + on ground
-        //Dont need to check on ground. We can't jump while on air either.
-        if (playerCombat.onCombatAnimation)
+        //Attacking
+        if (playerCombat.attacking)
             willJump = false;
 
         //Jump
         if (willJump)
         {
+            jumpingImpulseTime = Time.time + jumpingImpulseDuration;
+
             jumpPressRememberTime = 0f;
             coyoteTime = 0f;
-            isOnGround = false;
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpSpeed);
+            grounded = false;
+            jumping = true;
         }
+        if (jumpingImpulseTime > Time.time)
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpSpeed);
 
-        //Cut Y velocity if player isn't holding jump button anymore
-        if (!isOnGround && !playerInput.jumpHeld)
+
+        //Cut vSpeed of player (only positive VSpeed) when:
+        //Player is jumping but isn't holding jump button anymore
+        if (jumping && !grounded && !playerInput.jumpHeld)
         {
             if (rigidBody.velocity.y > 0f)
                 rigidBody.velocity = new Vector3(rigidBody.velocity.x, rigidBody.velocity.y * jumpReleaseMultiplier);

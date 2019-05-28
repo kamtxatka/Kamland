@@ -6,12 +6,12 @@ public class PlayerCombat : MonoBehaviour
 {
     [HideInInspector] public bool isGonnaAttack;                        //Will player attack this update cycle (for sure)?
     [HideInInspector] public int comboStep = 1;                         //What attack would we going to use next
-    [HideInInspector] public bool onCombatAnimation;                    //Are we in any attack animation?
+    [HideInInspector] public bool attacking;                            //Are we attacking?
     [HideInInspector] public bool onGroundCombat;                       //Combat on ground?
     [HideInInspector] public bool onAirCombat;                          //Combat on air?
 
     [SerializeField] int comboLength = 2;                               //Self explanatory
-    [SerializeField] float timeBetweenAttacks = 0.5f;                   //Self explanatory
+    [SerializeField] float timeBetweenAttacks = 0.4f;                   //Self explanatory
     [SerializeField] float bonusTimeToEndComboRelation = 0.5f;          //Time to reset combo after an attack (relative to time between attacks)
     [SerializeField] float attackRememberDuration = 0.1f;               //Time to hold attack=true after input (for easy control)
 
@@ -30,7 +30,7 @@ public class PlayerCombat : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         playerMovement = GetComponent<PlayerMovement>();
 
-        onCombatAnimation = false;
+        attacking = false;
         onGroundCombat = false;
         onAirCombat = false;
         comboStep = 1;
@@ -55,12 +55,12 @@ public class PlayerCombat : MonoBehaviour
         //Not actually attacking
         //Input
         //Enough time has passed since last attack
-        isGonnaAttack = (!onCombatAnimation && attackRememberTime > Time.time && Time.time > nextAttakTime);
+        isGonnaAttack = (!attacking && attackRememberTime > Time.time && Time.time > nextAttakTime);
 
         //We are sure player will attack. on ground - on air??
         if (isGonnaAttack)
         {
-            if (playerMovement.isOnGround)
+            if (playerMovement.grounded)
                 onGroundCombat = true;
             else
                 onAirCombat = true;
@@ -73,7 +73,7 @@ public class PlayerCombat : MonoBehaviour
 
     public void OnStateMachineEnter()
     {
-        onCombatAnimation = true;
+        attacking = true;
         comboEndTime = nextAttakTime + timeBetweenAttacks;
     }
 
@@ -91,7 +91,7 @@ public class PlayerCombat : MonoBehaviour
 
     public void OnStateMachineExit()
     {
-        onCombatAnimation = false;
+        attacking = false;
         onGroundCombat = false;
         onAirCombat = false;
     }

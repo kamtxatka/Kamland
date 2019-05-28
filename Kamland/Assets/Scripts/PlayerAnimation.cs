@@ -4,17 +4,16 @@ using UnityEngine;
 
 public class PlayerAnimation : MonoBehaviour
 {
+    Animator anim;
+    Rigidbody2D rigidBody;
+    PlayerInput playerInput;
     PlayerMovement playerMovement;
     PlayerCombat playerCombat;
-    Rigidbody2D rigidBody;
-    PlayerInput input;
-    Animator anim;
 
-    readonly int hMovementParamID = Animator.StringToHash("hMovement");
-    readonly int movingParamID = Animator.StringToHash("isMoving");
+    readonly int hVelocityParamID = Animator.StringToHash("hVelocity");
+    readonly int vVelocityParamID = Animator.StringToHash("vVelocity");
 
-    readonly int groundParamID = Animator.StringToHash("isOnGround");
-    readonly int airParamID = Animator.StringToHash("verticalVelocity");
+    readonly int groundedParamID = Animator.StringToHash("grounded");
 
     readonly int attackParamID = Animator.StringToHash("isGonnaAttack");
     readonly int comboStepParamID = Animator.StringToHash("comboStep");
@@ -25,23 +24,22 @@ public class PlayerAnimation : MonoBehaviour
 
     void Awake()
     {
+        anim = GetComponent<Animator>();
+        rigidBody = GetComponent<Rigidbody2D>();
+        playerInput = GetComponent<PlayerInput>();
         playerMovement = GetComponent<PlayerMovement>();
         playerCombat = GetComponent<PlayerCombat>();
-        rigidBody = GetComponent<Rigidbody2D>();
-        input = GetComponent<PlayerInput>();
-        anim = GetComponent<Animator>();
     }
 
     void Update()
     {
-        //Grounded State
-        float inputHorizontal = Mathf.Abs(input.horizontal);
-        anim.SetFloat(hMovementParamID, inputHorizontal);
-        anim.SetBool(movingParamID, (inputHorizontal != 0) ? true : false);
+        //Character velocity
+        float inputHorizontal = Mathf.Abs(playerInput.horizontal);
+        anim.SetFloat(hVelocityParamID, inputHorizontal);
+        anim.SetFloat(vVelocityParamID, rigidBody.velocity.y);
 
         //Mid Air State
-        anim.SetBool(groundParamID, playerMovement.isOnGround);
-        anim.SetFloat(airParamID, rigidBody.velocity.y);
+        anim.SetBool(groundedParamID, playerMovement.grounded);
 
         //Combat
         playerCombat.UpdateCombat();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//We make sure this monoB is executed before any other one
 [DefaultExecutionOrder(-100)]
 public class PlayerInput : MonoBehaviour
 {
@@ -26,11 +27,13 @@ public class PlayerInput : MonoBehaviour
         horizontal = Mathf.Clamp(horizontal, -1, 1);
     }
 
+    //Inputs will be used in playerMovement's fixedUpdate. Set them ready to clear
     void FixedUpdate()
     {
         readyToClear = true;
     }
 
+    //Will only clear inputs if we've gone throught an iteration of fixed update
     void ClearInput()
     {
         if (!readyToClear)
