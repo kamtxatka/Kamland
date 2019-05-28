@@ -22,21 +22,23 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] LayerMask groundLayer;                     //What layer can teh player walk on?
 
     [Header("Status Flags")]
-    public bool grounded;                                       //Is player on ground 
-    public bool jumping;                                        //Debug utility: True while we set yspeed to jumpforce (0.1s aprox)
-    public bool falling;                                        //Debug utility: Is player falling?
+    public bool grounded;                                       //Is player on ground
+    public bool jumping;                                        //Is player jumping? (impulses cancells it)
+    public bool impulsed;                                       //Char has been impulsed (true untill touches ground) 
 
     BoxCollider2D boxCollider;
     Rigidbody2D rigidBody;
     PlayerInput playerInput;
     PlayerCombat playerCombat;
 
+    Vector2 targetImpulse;                                      //Any impulse player recieves (being hit, air attack, etc)
+
     float jumpingImpulseTime;                                   //After this time we wont set yspeed to jumpspeed anymore
     float coyoteTime;                                           //We consider player is on ground untill this time
     float jumpPressRememberTime;                                //We consider players is input jumping untill this time
 
     float originalXScale;                                       //For turning char
-    int direction = 1;                                          //Current char dir. Right 1, Left -1
+    int direction;                                              //Current char dir. Right 1, Left -1
 
     float footOffsetXLeft;                                      //Left foot FROM players perspective
     float footOffsetXRight;                                     //Left foot FROM players perspective
@@ -50,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
         playerCombat = GetComponent<PlayerCombat>();
 
         originalXScale = transform.localScale.x;
+        direction = 1;
 
         //Left char foot is to the right of screen (player facing right)
         //Right char foot is to the left of the screen (player facing right)
@@ -63,15 +66,15 @@ public class PlayerMovement : MonoBehaviour
         PhysicsCheck();
         HorizontalMovement();
         MidAirMovement();
+        ImpulseMovement();
     }
 
     /// <summary>
-    /// Check grounded, falling and jumping state
+    /// Check grounded, falling and jumping state.
     /// </summary>
     void PhysicsCheck()
     {
         grounded = false;
-        falling = (rigidBody.velocity.y < 0f) ? true : false;
 
         if (rigidBody.velocity.y > 0f)
             return;
@@ -79,14 +82,15 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit2D leftHit = RaycastWithOffset(new Vector2(footOffsetXLeft, footOffsetY), Vector2.down, groundDistance, groundLayer);
         RaycastHit2D rightHit = RaycastWithOffset(new Vector2(footOffsetXRight, footOffsetY), Vector2.down, groundDistance, groundLayer);
         if (leftHit || rightHit)
+        {
             grounded = true;
-
-        if (grounded)
             jumping = false;
+            impulsed = false;
+        }
     }
 
     /// <summary>
-    /// Horizontal Movement related behaviour
+    /// Horizontal Movement related behaviour.
     /// </summary>
     void HorizontalMovement()
     {
@@ -108,7 +112,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Vertical Movement related behaviour
+    /// Vertical Movement related behaviour.
     /// </summary>
     void MidAirMovement()
     {
@@ -143,11 +147,13 @@ public class PlayerMovement : MonoBehaviour
             rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpSpeed);
 
 
-        //Cut vSpeed of player (only positive VSpeed) when:
-        //Player is jumping but isn't holding jump button anymore
-        if (jumping && !grounded && !playerInput.jumpHeld)
+        //Cut vSpeed >= 0 when:
+        //Player jumped but isn't holding jump button anymore
+        //Player has recieved an impulse
+        if (rigidBody.velocity.y > 0f)
         {
-            if (rigidBody.velocity.y > 0f)
+            bool cutvSpeed = (jumping && !playerInput.jumpHeld) || impulsed;
+            if (cutvSpeed)
                 rigidBody.velocity = new Vector3(rigidBody.velocity.x, rigidBody.velocity.y * jumpReleaseMultiplier);
         }
 
@@ -156,6 +162,40 @@ public class PlayerMovement : MonoBehaviour
             rigidBody.velocity = new Vector2(rigidBody.velocity.x, maxFallSpeed);
     }
 
+    /// <summary>
+    /// Impulse (vector2) related behaviour. e.g. Being hit, air attack, etc.
+    /// </summary>
+    void ImpulseMovement()
+    {
+        if (this.targetImpulse == Vector2.zero)
+            return;
+
+        impulsed = true;
+        jumping = false;
+
+        Vector2 impulseApplied = rigidBody.velocity;
+
+        if (targetImpulse.x != 0)
+            impulseApplied.x = targetImpulse.x;
+        if (targetImpulse.y != 0)
+            impulseApplied.y = targetImpulse.y;
+
+        rigidBody.velocity = impulseApplied;
+
+        targetImpulse = Vector2.zero;
+    }
+
+    /// <summary>
+    /// Stacks an Impulse (vector2) which will be aplied on the next fixedUpdate.
+    /// </summary>
+    public void ReceiveSpeedImpulse(Vector2 impulseVector)
+    {
+        this.targetImpulse = impulseVector;
+    }
+
+    /// <summary>
+    /// Flips Char + swaps foot offset for ground detection.
+    /// </summary>
     void FlipCharacterDirection()
     {
         direction *= -1;

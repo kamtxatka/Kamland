@@ -14,8 +14,10 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] float timeBetweenAttacks = 0.4f;                   //Self explanatory
     [SerializeField] float bonusTimeToEndComboRelation = 0.5f;          //Time to reset combo after an attack (relative to time between attacks)
     [SerializeField] float attackRememberDuration = 0.1f;               //Time to hold attack=true after input (for easy control)
+    [SerializeField] float airAttackVImpulse = 10f;                     //Set this vSpeed updwards when char is falling and attacks (ninja style)
 
     Animator animator;
+    Rigidbody2D rigidBody;
     PlayerCombatMachine playerCombatMachine;
     PlayerInput playerInput;
     PlayerMovement playerMovement;
@@ -27,6 +29,7 @@ public class PlayerCombat : MonoBehaviour
     void Awake()
     {
         animator = GetComponent<Animator>();
+        rigidBody = GetComponent<Rigidbody2D>();
         playerInput = GetComponent<PlayerInput>();
         playerMovement = GetComponent<PlayerMovement>();
 
@@ -63,7 +66,13 @@ public class PlayerCombat : MonoBehaviour
             if (playerMovement.grounded)
                 onGroundCombat = true;
             else
+            {
                 onAirCombat = true;
+                //Conditions to give an upwards impulse (ninja like)
+                //vSpeed less than impulse itself
+                if (rigidBody.velocity.y < 0f)
+                    playerMovement.ReceiveSpeedImpulse(new Vector2(0f, airAttackVImpulse));
+            }
         }
 
         //Reset combo if time for combo has ended
