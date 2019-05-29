@@ -1687,6 +1687,7 @@ MonoBehaviour:
   timeBetweenAttacks: 0.4
   bonusTimeToEndComboRelation: 0.5
   attackRememberDuration: 0.1
+  airAttackVImpulse: 10
 --- !u!114 &1004724199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1713,7 +1714,7 @@ MonoBehaviour:
     m_Bits: 256
   grounded: 0
   jumping: 0
-  falling: 0
+  impulsed: 0
 --- !u!114 &1004724200
 MonoBehaviour:
   m_ObjectHideFlags: 0

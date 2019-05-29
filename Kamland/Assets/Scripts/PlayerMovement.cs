@@ -117,6 +117,7 @@ public class PlayerMovement : MonoBehaviour
     void MidAirMovement()
     {
         bool willJump = false;
+        Vector2 targetVelocity = rigidBody.velocity;
 
         //Conditions to jump (with timers to make easier controls)
         //1 Input
@@ -144,22 +145,24 @@ public class PlayerMovement : MonoBehaviour
             jumping = true;
         }
         if (jumpingImpulseTime > Time.time)
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpSpeed);
-
+            targetVelocity.y = jumpSpeed;
 
         //Cut vSpeed >= 0 when:
         //Player jumped but isn't holding jump button anymore
         //Player has recieved an impulse
-        if (rigidBody.velocity.y > 0f)
+        if (targetVelocity.y > 0f)
         {
             bool cutvSpeed = (jumping && !playerInput.jumpHeld) || impulsed;
             if (cutvSpeed)
-                rigidBody.velocity = new Vector3(rigidBody.velocity.x, rigidBody.velocity.y * jumpReleaseMultiplier);
+                targetVelocity.y = rigidBody.velocity.y * jumpReleaseMultiplier;
         }
 
         //Player can't fall faster than maxFallSpeed
-        if (rigidBody.velocity.y < maxFallSpeed)
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, maxFallSpeed);
+        if (targetVelocity.y < maxFallSpeed)
+            targetVelocity.y = maxFallSpeed;
+
+        //Finally lets apply the wanted velocity
+        rigidBody.velocity = targetVelocity;
     }
 
     /// <summary>
