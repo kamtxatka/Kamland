@@ -6,7 +6,7 @@ Metroidvania like project
 Code can be found at: Kamland/Assets/Scripts
 
 
-## Videos
+## Videos (OLD!)
 Videos with different gameplay styles (still deciding which way to go):
 
 - Combat 1-2-3 Linked combo:
