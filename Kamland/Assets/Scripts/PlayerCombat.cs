@@ -17,7 +17,6 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] float airAttackVImpulse = 10f;                     //Set this vSpeed updwards when char is falling and attacks (ninja style)
 
     Animator animator;
-    Rigidbody2D rigidBody;
     PlayerCombatMachine playerCombatMachine;
     PlayerInput playerInput;
     PlayerMovement playerMovement;
@@ -29,7 +28,6 @@ public class PlayerCombat : MonoBehaviour
     void Awake()
     {
         animator = GetComponent<Animator>();
-        rigidBody = GetComponent<Rigidbody2D>();
         playerInput = GetComponent<PlayerInput>();
         playerMovement = GetComponent<PlayerMovement>();
 
@@ -54,10 +52,7 @@ public class PlayerCombat : MonoBehaviour
         if (playerInput.attack)
             attackRememberTime = Time.time + attackRememberDuration;
 
-        //3 conditions to attack
-        //Not actually attacking
-        //Input
-        //Enough time has passed since last attack
+        //Attack if: Not attacking + Input + Enough time has passed since last attack
         isGonnaAttack = (!attacking && attackRememberTime > Time.time && Time.time > nextAttakTime);
 
         //We are sure player will attack. on ground - on air??
@@ -68,9 +63,8 @@ public class PlayerCombat : MonoBehaviour
             else
             {
                 onAirCombat = true;
-                //Conditions to give an upwards impulse (ninja like)
-                //vSpeed less than impulse itself
-                if (rigidBody.velocity.y < 0f)
+                //Little vertical impulse when player is falling
+                if (playerMovement.falling)
                     playerMovement.ReceiveSpeedImpulse(new Vector2(0f, airAttackVImpulse));
             }
         }

@@ -24,7 +24,9 @@ public class PlayerMovement : MonoBehaviour
     [Header("Status Flags")]
     public bool grounded;                                       //Is player on ground
     public bool jumping;                                        //Is player jumping? (impulses cancells it)
+    public bool falling;                                        //Is player falling?
     public bool impulsed;                                       //Char has been impulsed (true untill touches ground) 
+
 
     BoxCollider2D boxCollider;
     Rigidbody2D rigidBody;
@@ -54,8 +56,8 @@ public class PlayerMovement : MonoBehaviour
         originalXScale = transform.localScale.x;
         direction = 1;
 
-        //Left char foot is to the right of screen (player facing right)
-        //Right char foot is to the left of the screen (player facing right)
+        //Left char foot is at the right of screen (player facing right)
+        //Right char foot is at the left of the screen (player facing right)
         footOffsetXLeft = direction * boxCollider.offset.x + boxCollider.size.x * 0.5f;
         footOffsetXRight = direction * boxCollider.offset.x - boxCollider.size.x * 0.5f;
         footOffsetY = boxCollider.offset.y - boxCollider.size.y * 0.5f;
@@ -76,9 +78,12 @@ public class PlayerMovement : MonoBehaviour
     {
         grounded = false;
 
+        falling = rigidBody.velocity.y < 0f;
+
         if (rigidBody.velocity.y > 0f)
             return;
 
+        //Jumping and impulsed get cancelled if player touches ground
         RaycastHit2D leftHit = RaycastWithOffset(new Vector2(footOffsetXLeft, footOffsetY), Vector2.down, groundDistance, groundLayer);
         RaycastHit2D rightHit = RaycastWithOffset(new Vector2(footOffsetXRight, footOffsetY), Vector2.down, groundDistance, groundLayer);
         if (leftHit || rightHit)
@@ -96,14 +101,11 @@ public class PlayerMovement : MonoBehaviour
     {
         float xTargetVelocity = horizontalSpeed * playerInput.horizontal;
 
-        //Conditions to avoid horizontal movement:
-        //Performing a grounded attack
-        //Say we started attacking on air. We could still move horizontallly when we touch the ground
+        //Avoid horizontal movement when: doing grounded attack 
         if (playerCombat.onGroundCombat)
             xTargetVelocity = 0f;
 
-        //Conditions to be able to turn the character:
-        //Not currently attacking
+        //Turn char when: not attacking
         if (!playerCombat.attacking)
             if (xTargetVelocity * direction < 0f)
                 FlipCharacterDirection();
@@ -119,9 +121,7 @@ public class PlayerMovement : MonoBehaviour
         bool willJump = false;
         Vector2 targetVelocity = rigidBody.velocity;
 
-        //Conditions to jump (with timers to make easier controls)
-        //1 Input
-        //2 OnGround
+        //Jump when: Input + onGround
         if (playerInput.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
         if (grounded)
@@ -129,8 +129,7 @@ public class PlayerMovement : MonoBehaviour
 
         willJump = jumpPressRememberTime > Time.time && coyoteTime > Time.time;
 
-        //Conditions to cancel jump
-        //Attacking
+        //Cancel jump when attacking
         if (playerCombat.attacking)
             willJump = false;
 
@@ -147,9 +146,9 @@ public class PlayerMovement : MonoBehaviour
         if (jumpingImpulseTime > Time.time)
             targetVelocity.y = jumpSpeed;
 
-        //Cut vSpeed >= 0 when:
-        //Player jumped but isn't holding jump button anymore
-        //Player has recieved an impulse
+        //Cut vSpeed >= 0 for better feeling (quick deacceleration feeling)
+        //1: Player jumped but isn't holding jump button anymore
+        //2: Player has recieved an impulse
         if (targetVelocity.y > 0f)
         {
             bool cutvSpeed = (jumping && !playerInput.jumpHeld) || impulsed;
@@ -184,7 +183,6 @@ public class PlayerMovement : MonoBehaviour
             impulseApplied.y = targetImpulse.y;
 
         rigidBody.velocity = impulseApplied;
-
         targetImpulse = Vector2.zero;
     }
 
