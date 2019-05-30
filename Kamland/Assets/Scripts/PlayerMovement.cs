@@ -71,65 +71,61 @@ public class PlayerMovement : MonoBehaviour
         ImpulseMovement();
     }
 
-    /// <summary>
-    /// Check grounded, falling and jumping state.
-    /// </summary>
+    /// <summary> Check player state: grounded, falling, jumping, impulsed. </summary>
     void PhysicsCheck()
     {
         grounded = false;
 
         falling = rigidBody.velocity.y < 0f;
 
-        if (rigidBody.velocity.y > 0f)
-            return;
-
-        //Jumping and impulsed get cancelled if player touches ground
+        //Check grounded except when: moving upwards
+        if (rigidBody.velocity.y > 0f) return;
         RaycastHit2D leftHit = RaycastWithOffset(new Vector2(footOffsetXLeft, footOffsetY), Vector2.down, groundDistance, groundLayer);
         RaycastHit2D rightHit = RaycastWithOffset(new Vector2(footOffsetXRight, footOffsetY), Vector2.down, groundDistance, groundLayer);
         if (leftHit || rightHit)
-        {
             grounded = true;
+
+        //When player is on ground we cancel jumps or impulses
+        if (grounded)
+        {
+            //todo: cancel jumping
             jumping = false;
             impulsed = false;
         }
     }
 
-    /// <summary>
-    /// Horizontal Movement related behaviour.
-    /// </summary>
+    /// <summary> Horizontal Movement related behaviour. </summary>
     void HorizontalMovement()
     {
-        float xTargetVelocity = horizontalSpeed * playerInput.horizontal;
+        float hTargetVelocity = horizontalSpeed * playerInput.horizontal;
 
         //Avoid horizontal movement when: doing grounded attack 
         if (playerCombat.onGroundCombat)
-            xTargetVelocity = 0f;
+            hTargetVelocity = 0f;
 
         //Turn char when: not attacking
         if (!playerCombat.attacking)
-            if (xTargetVelocity * direction < 0f)
+            if (hTargetVelocity * direction < 0f)
                 FlipCharacterDirection();
 
-        rigidBody.velocity = new Vector2(xTargetVelocity, rigidBody.velocity.y);
+        rigidBody.velocity = new Vector2(hTargetVelocity, rigidBody.velocity.y);
     }
 
-    /// <summary>
-    /// Vertical Movement related behaviour.
-    /// </summary>
+    /// <summary> Vertical Movement related behaviour. </summary>
     void MidAirMovement()
     {
-        bool willJump = false;
-        Vector2 targetVelocity = rigidBody.velocity;
+        float vCurrentVelocity = rigidBody.velocity.y;
+        float vTargetVelocity = vCurrentVelocity;
 
-        //Jump when: Input + onGround
+        bool willJump;
+        //Jump when: Input (wantToJump) + grounded (canJump)
         if (playerInput.jumpPressed)
             jumpPressRememberTime = Time.time + jumpPressRememberDuration;
         if (grounded)
             coyoteTime = Time.time + coyoteDuration;
-
         willJump = jumpPressRememberTime > Time.time && coyoteTime > Time.time;
 
-        //Cancel jump when attacking
+        //Cancel jump when: attacking
         if (playerCombat.attacking)
             willJump = false;
 
@@ -137,66 +133,62 @@ public class PlayerMovement : MonoBehaviour
         if (willJump)
         {
             jumpingImpulseTime = Time.time + jumpingImpulseDuration;
-
             jumpPressRememberTime = 0f;
             coyoteTime = 0f;
-            grounded = false;
-            jumping = true;
         }
         if (jumpingImpulseTime > Time.time)
-            targetVelocity.y = jumpSpeed;
+        {
+            vTargetVelocity = jumpSpeed;
+            jumping = true;
+        }
 
         //Cut vSpeed >= 0 for better feeling (quick deacceleration feeling)
         //1: Player jumped but isn't holding jump button anymore
         //2: Player has recieved an impulse
-        if (targetVelocity.y > 0f)
+        if (vCurrentVelocity > 0f)
         {
             bool cutvSpeed = (jumping && !playerInput.jumpHeld) || impulsed;
             if (cutvSpeed)
-                targetVelocity.y = rigidBody.velocity.y * jumpReleaseMultiplier;
+                vTargetVelocity = vCurrentVelocity * jumpReleaseMultiplier;
         }
 
         //Player can't fall faster than maxFallSpeed
-        if (targetVelocity.y < maxFallSpeed)
-            targetVelocity.y = maxFallSpeed;
+        if (vCurrentVelocity < maxFallSpeed)
+            vTargetVelocity = maxFallSpeed;
 
         //Finally lets apply the wanted velocity
-        rigidBody.velocity = targetVelocity;
+        rigidBody.velocity = new Vector2(rigidBody.velocity.x, vTargetVelocity);
     }
 
-    /// <summary>
-    /// Impulse (vector2) related behaviour. e.g. Being hit, air attack, etc.
-    /// </summary>
+    /// <summary> Impulse (vector2) related behaviour. e.g. Being hit, air attack, etc. Impulses cancel jumping </summary>
     void ImpulseMovement()
     {
         if (this.targetImpulse == Vector2.zero)
             return;
 
-        impulsed = true;
         jumping = false;
+        jumpingImpulseTime = 0f;
+
+        impulsed = true;
 
         Vector2 impulseApplied = rigidBody.velocity;
 
-        if (targetImpulse.x != 0)
+        if (targetImpulse.x != 0f)
             impulseApplied.x = targetImpulse.x;
-        if (targetImpulse.y != 0)
+        if (targetImpulse.y != 0f)
             impulseApplied.y = targetImpulse.y;
 
         rigidBody.velocity = impulseApplied;
         targetImpulse = Vector2.zero;
     }
 
-    /// <summary>
-    /// Stacks an Impulse (vector2) which will be aplied on the next fixedUpdate.
-    /// </summary>
+    /// <summary> Stacks an Impulse (vector2) which will be aplied on the next fixedUpdate. </summary>
     public void ReceiveSpeedImpulse(Vector2 impulseVector)
     {
         this.targetImpulse = impulseVector;
     }
 
-    /// <summary>
-    /// Flips Char + swaps foot offset for ground detection.
-    /// </summary>
+    /// <summary> Flips Char + swaps foot offset for ground detection. </summary>
     void FlipCharacterDirection()
     {
         direction *= -1;
